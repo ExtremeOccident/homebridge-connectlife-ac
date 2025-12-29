@@ -146,13 +146,17 @@ class TemperatureAccessory {
             t_up_down: 'integer',
             f_temp_in: 'integer',
         });
+        // Use cached state for temperature values when API returns invalid defaults (0)
+        // Temperature values of 0 are invalid for AC operation (valid range: 10-35)
+        const tTemp = result.t_temp;
+        const fTempIn = result.f_temp_in;
         return {
             t_power: result.t_power ?? this.cachedState.t_power,
-            t_temp: result.t_temp ?? this.cachedState.t_temp,
+            t_temp: (tTemp && tTemp >= MIN_TEMP) ? tTemp : this.cachedState.t_temp,
             t_temp_type: result.t_temp_type ?? this.cachedState.t_temp_type,
             t_work_mode: result.t_work_mode ?? this.cachedState.t_work_mode,
             t_up_down: result.t_up_down ?? this.cachedState.t_up_down,
-            f_temp_in: result.f_temp_in ?? this.cachedState.f_temp_in,
+            f_temp_in: fTempIn > 0 ? fTempIn : this.cachedState.f_temp_in,
         };
     }
     // Map ConnectLife work modes to HomeKit CurrentHeaterCoolerState
